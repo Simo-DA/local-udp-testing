@@ -1,0 +1,15 @@
+services:
+  s3_bucket:
+    image: minio/minio:latest
+    container_name: s3_bucket
+    ports:
+      - "9000:9000" # MinIO console/API
+      - "9001:9001" # MinIO console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - s3_bucket_data:/data
+    command: server /data --console-address ":9001"
+volumes:
+  s3_bucket_data:
