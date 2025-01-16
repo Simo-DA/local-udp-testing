@@ -1,7 +1,7 @@
 services:
-  s3_bucket:
+  s3-bucket:
     image: minio/minio:latest
-    container_name: s3_bucket
+    container_name: s3-bucket
     ports:
       - "9000:9000" # MinIO console/API
       - "9001:9001" # MinIO console
@@ -11,5 +11,19 @@ services:
     volumes:
       - s3_bucket_data:/data
     command: server /data --console-address ":9001"
+  mqtt-consumer:
+    build:
+      context: ./src/mqtt_consumer
+    container_name: mqtt-consumer
+    environment:
+      NIOTIX_BROKER_URI: ${NIOTIX_BROKER_URI}
+      NIOTIX_BROKER_PORT: ${NIOTIX_BROKER_PORT}
+      NIOTIX_BROKER_USERNAME: ${NIOTIX_BROKER_USERNAME}
+      NIOTIX_BROKER_PASSWORD: ${NIOTIX_BROKER_PASSWORD}
+      NIOTIX_BROKER_TOPIC: ${NIOTIX_BROKER_TOPIC}
+      S3_HOST: ${S3_HOST_NAME}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
 volumes:
   s3_bucket_data:
