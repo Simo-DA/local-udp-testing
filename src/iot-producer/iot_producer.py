@@ -1,68 +1,38 @@
+import sys
 import pika
-import json
 import time
-import random
-import uuid
-from typing import Union
+from utils.connect_to_rabbitmq import connect_to_rabbitmq
+from utils.mock_iot_message import mock_iot_message
+
+# Force stdout to be line-buffered for live-logging inside the container
+sys.stdout.reconfigure(line_buffering=True)
 
 
-RABBITMQ_HOST = "rabbitmq"
 RABBITMQ_QUEUE = "iot-data"
 
 
-# Establish connection to RabbitMQ
-def connect_to_rabbitmq() -> (
-    Union[pika.adapters.blocking_connection.BlockingChannel, None]
-):
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
-        print("Successfully connected to RabbitMQ")
-        return connection.channel()
-    except Exception as e:
-        print("Error connecting to RabbitMQ: ", e)
-        return None
-
-
-def create_iot_message(device_id: str) -> dict[str, Union[str, float, int]]:
-    id = str(uuid.uuid4())
-    temperature = 10.0 + random.uniform(-15.0, 15.0)
-    timestamp = time.time()
-    message = json.dumps(
-        {
-            "device_id": device_id,
-            "id": id,
-            "temperature": temperature,
-            "timestamp": timestamp,
-        }
-    )
-    return message
-
-
-# Send a message to RabbitMQ
-def publish_message(
-    channel: pika.adapters.blocking_connection.BlockingChannel, queue: str, message: str
-) -> None:
+def publish_message_to_rabbitmq(channel, queue, message):
     try:
         channel.queue_declare(queue=queue, durable=True)
         channel.basic_publish(exchange="", routing_key=queue, body=message)
-        print(f"Sent message: {message}")
-    except Exception as e:
-        print("Error sending message: ", e)
+    except pika.exceptions.AMQPConnectionError:
+        print("Connection lost. Attempting to reconnect...")
+        channel = connect_to_rabbitmq()
+    except KeyboardInterrupt:
+        print("Shutting down gracefully...")
+    finally:
+        formatted_time = time.strftime("%d:%m - %H-%M-%S", time.localtime())
+        print(f"{formatted_time}: Sent message: queue: {queue}, 'message': {message}")
+        time.sleep(10)
 
 
 # Main function to produce data
 def main():
-    print("Starting IoT Producer")
+    print("IoT Producer - Started")
+    channel = connect_to_rabbitmq()
     while True:
-        channel = connect_to_rabbitmq()
-        try:
-            message = create_iot_message("device-1")
-            print(message)
-            publish_message(channel, RABBITMQ_QUEUE, message)
-            time.sleep(5)  # Simulate time delay between messages
-        except Exception as e:
-            print("Error in main loop: ", e)
-        channel.close()
+        message = mock_iot_message("device-1")
+        publish_message_to_rabbitmq(channel, RABBITMQ_QUEUE, message)
 
 
 if __name__ == "__main__":
