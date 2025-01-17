@@ -38,7 +38,7 @@ def consume_message(channel, method, properties, body):
             Body=json.dumps(data),
             ContentType="application/json",
         )
-        print(f"Uploaded data to S3: {object_key}")
+        print(f"Uploaded file to S3: {object_key}")
 
         # Acknowledge the message
         channel.basic_ack(delivery_tag=method.delivery_tag)
