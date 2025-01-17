@@ -9,6 +9,7 @@ sys.stdout.reconfigure(line_buffering=True)
 
 print("IoT Producer - Started")
 RABBITMQ_QUEUE = "iot-data"
+MESSAGE_DELAY_SEC = 10
 channel = connect_to_rabbitmq()
 
 
@@ -24,7 +25,7 @@ def publish_message_to_rabbitmq(channel, queue, message):
     finally:
         formatted_time = time.strftime("%d:%m - %H-%M-%S", time.localtime())
         print(f"{formatted_time}: Sent message: queue: {queue}, 'message': {message}")
-        time.sleep(10)
+        time.sleep(MESSAGE_DELAY_SEC)
 
 
 # Main function to produce data
