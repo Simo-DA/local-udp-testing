@@ -7,8 +7,9 @@ from utils.mock_iot_message import mock_iot_message
 # Force stdout to be line-buffered for live-logging inside the container
 sys.stdout.reconfigure(line_buffering=True)
 
-
+print("IoT Producer - Started")
 RABBITMQ_QUEUE = "iot-data"
+channel = connect_to_rabbitmq()
 
 
 def publish_message_to_rabbitmq(channel, queue, message):
@@ -28,8 +29,6 @@ def publish_message_to_rabbitmq(channel, queue, message):
 
 # Main function to produce data
 def main():
-    print("IoT Producer - Started")
-    channel = connect_to_rabbitmq()
     while True:
         message = mock_iot_message("device-1")
         publish_message_to_rabbitmq(channel, RABBITMQ_QUEUE, message)
