@@ -1,6 +1,7 @@
 import sys
-import pika
 import time
+import pika
+from pika.adapters.blocking_connection import BlockingChannel
 from utils.connect_to_rabbitmq import connect_to_rabbitmq
 from utils.mock_iot_message import mock_iot_message
 
@@ -13,7 +14,9 @@ MESSAGE_DELAY_SEC = 10
 channel = connect_to_rabbitmq()
 
 
-def publish_message_to_rabbitmq(channel, queue, message):
+def publish_message_to_rabbitmq(
+    channel: BlockingChannel, queue: str, message: str
+) -> None:
     try:
         channel.queue_declare(queue=queue, durable=True)
         channel.basic_publish(exchange="", routing_key=queue, body=message)

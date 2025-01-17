@@ -1,4 +1,14 @@
-def prepare_consumption(channel, queue_name, callback_function):
+# Types
+from typing import Callable
+from pika.adapters.blocking_connection import BlockingChannel
+from pika.spec import Basic, BasicProperties
+
+
+def prepare_consumption(
+    channel: BlockingChannel,
+    queue_name: str,
+    callback_function: Callable[[Basic.Deliver, BasicProperties, bytes], None],
+) -> BlockingChannel:
     try:
         channel.queue_declare(queue=queue_name, durable=True)
         channel.basic_qos(prefetch_count=1)

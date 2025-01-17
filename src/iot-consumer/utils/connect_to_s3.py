@@ -1,7 +1,9 @@
 import boto3
 
 
-def connect_to_s3(endpoint_url, access_key_id, secret_access_key):
+def connect_to_s3(
+    endpoint_url: str, access_key_id: str, secret_access_key: str
+) -> boto3.client:
     try:
         s3_client = boto3.client(
             "s3",

@@ -1,11 +1,14 @@
 import pika
 
+# Types
+from pika.adapters.blocking_connection import BlockingChannel
+
 # docker-compose service name
 RABBITMQ_HOST = "rabbitmq"
 
 
 # Establish connection to RabbitMQ
-def connect_to_rabbitmq():
+def connect_to_rabbitmq() -> BlockingChannel:
     try:
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=RABBITMQ_HOST)
