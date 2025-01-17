@@ -1,65 +1,57 @@
 import os
-import pika
-import boto3
+import sys
 import json
 import uuid
-from dotenv import load_dotenv
+from utils.connect_to_rabbitmq import connect_to_rabbitmq
+from utils.connect_to_s3 import connect_to_s3
+from utils.prepare_consumption import prepare_consumption
 
-load_dotenv()
 
-AWS_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
-AWS_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
+# Force stdout to be line-buffered for logging
+sys.stdout.reconfigure(line_buffering=True)
 
-RABBITMQ_HOST = "rabbitmq"
+
 QUEUE_NAME = "iot-data"
-
-s3_client = boto3.client(
-    "s3",
-    endpoint_url="http://s3bucket:9000",
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_KEY,
-)
 BUCKET_NAME = "iot-data"
-try:
-    print(s3_client.list_objects_v2(Bucket=BUCKET_NAME))
-except Exception as e:
-    print("Error to print bucket: ", e)
+ENDPOINT_URL = "http://s3bucket:9000"
+
+# Establish rabbitMQ connection
+print("Iot Consumer - Started")
+channel = connect_to_rabbitmq()
+# Establish s3 connection
+s3_client = connect_to_s3(
+    ENDPOINT_URL, os.getenv("MINIO_ACCESS_KEY"), os.getenv("MINIO_SECRET_KEY")
+)
 
 
-def callback(ch, method, properties, body):
-    print(f"Received message: {body.decode()}")
+def consume_message(channel, method, properties, body):
+    try:
+        data = json.loads(body.decode())
+        print(f"Received message: {data}")
 
-    data = json.loads(body.decode())
-    object_key = f"{data.get('id',uuid.uuid4())}.json"
-    # Upload data to S3
-    s3_client.put_object(
-        Bucket=BUCKET_NAME,
-        Key=object_key,
-        Body=json.dumps(data),
-        ContentType="application/json",
-    )
-    print(f"Uploaded data to S3: {object_key}")
+        # create file name s3 bucket
+        object_key = f"{data.get('id',uuid.uuid4())}.json"
 
-    # Acknowledge the message
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=object_key,
+            Body=json.dumps(data),
+            ContentType="application/json",
+        )
+        print(f"Uploaded data to S3: {object_key}")
 
-
-def connect_to_rabbitmq():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
-    channel = connection.channel()
-    channel.queue_declare(queue=QUEUE_NAME, durable=True)
-    channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(queue=QUEUE_NAME, on_message_callback=callback)
-    return channel
+        # Acknowledge the message
+        channel.basic_ack(delivery_tag=method.delivery_tag)
+        print(f"Message Acknowledged")
+        print(f"-----------")
+    except Exception as e:
+        print(f"Error while processing message: {e}")
 
 
-def main():
-
-    channel = connect_to_rabbitmq()
-    print(f"Waiting for messages in {QUEUE_NAME}...")
+def main(channel):
+    channel = prepare_consumption(channel, QUEUE_NAME, consume_message)
     channel.start_consuming()
 
 
 if __name__ == "__main__":
-
-    main()
+    main(channel)
