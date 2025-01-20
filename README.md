@@ -56,24 +56,29 @@ docker compose up -d --build
 
 ### Port Mapping Services
 
-- MinIO UI [localhost:9001](localhost:9001)
-- MinIO API [localhost:9000](localhost:9000)
-- RabbitMQ messaging [localhost:5672](localhost:5672)
-- RabbitMQ management UI [localhost:15672](localhost:15672)
-- PostgresDB [localhost:5432](localhost:5432)
+- MinIO UI [localhost:9001](http://localhost:9001)
+- MinIO API [localhost:9000](http://localhost:9000)
+- PostgresDB [localhost:5432](http://localhost:5432)
+- RabbitMQ messaging [localhost:5672](http://localhost:5672)
+- RabbitMQ management UI [localhost:15672](http://localhost:15672)
+- Flink UI [localhost:8081](http://localhost:8081)
 
 ## Usage
 
 ### MinIO
 
-MinIO is used to create a local S3-Bucket service. Got to the [MinIO-UI](https://localhost:9001) and login with the credentials (MINIO_ROOT_USER, MINIO_ROOT_PASSWORD) set in your [.env](./.env) file.
+MinIO is used to create a local S3-Bucket service. Got to the [MinIO-UI](http://localhost:9001) and login with the credentials (MINIO_ROOT_USER, MINIO_ROOT_PASSWORD) set in your [.env](./.env) file.
 
 You can manualy add new buckets or create access keys, users and user-roles.
 
 ### RabbitMQ
 
-Acces the [RabbitMQ-UI here](localhost:15672).
+Acces the [RabbitMQ-UI here](http://localhost:15672).
 
 ### PostgresDB
 
 Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use connection settings set in your [.env](./.env) file.
+
+### Flink UI
+
+Acces the [Flink-UI here](http://localhost:8081).
