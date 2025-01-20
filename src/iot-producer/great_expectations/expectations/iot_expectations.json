@@ -1,0 +1,19 @@
+{
+  "expectation_suite_name": "iot_expectations",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "sensor_id"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "temperature",
+        "min_value": -50,
+        "max_value": 50
+      }
+    }
+  ]
+}

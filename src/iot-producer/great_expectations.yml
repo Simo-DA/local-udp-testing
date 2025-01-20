@@ -1,0 +1,39 @@
+datasources:
+  iot_producer_datasource:
+    class_name: Datasource
+    execution_engine:
+      class_name: PandasExecutionEngine
+    data_connectors:
+      default_inferred_data_connector_name:
+        class_name: InferredAssetFilesystemDataConnector
+        base_directory: ../data/iot_producer
+        default_regex:
+          group_names:
+            - data_asset_name
+          pattern: (.*)\.csv
+
+expectation_suites:
+  iot_expectations:
+    expectation_suite_name: iot_expectations
+    expectations:
+      - expectation_type: expect_column_values_to_not_be_null
+        kwargs:
+          column: sensor_id
+      - expectation_type: expect_column_values_to_be_between
+        kwargs:
+          column: temperature
+          min_value: -50
+          max_value: 50
+
+checkpoints:
+  iot_checkpoint:
+    name: iot_checkpoint
+    config_version: 1.0
+    class_name: Checkpoint
+    run_name_template: "%Y-%m-%d-%H-%M-%S-my-run-name-template"
+    validations:
+      - batch_request:
+          datasource_name: iot_producer_datasource
+          data_connector_name: default_inferred_data_connector_name
+          data_asset_name: iot_data
+        expectation_suite_name: iot_expectations
