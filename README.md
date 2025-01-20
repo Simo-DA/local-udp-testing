@@ -62,6 +62,7 @@ docker compose up -d --build
 - RabbitMQ messaging [localhost:5672](http://localhost:5672)
 - RabbitMQ management UI [localhost:15672](http://localhost:15672)
 - Flink UI [localhost:8081](http://localhost:8081)
+- Great Expectations [localhost:3000](http://localhost:3000)
 
 ## Usage
 
@@ -82,3 +83,7 @@ Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use conne
 ### Flink UI
 
 Acces the [Flink-UI here](http://localhost:8081).
+
+### Great Expectations
+
+Great Expectations is used to validate your data. Configure your expectations and checkpoints in the `great_expectations` directory. Run the checkpoints using the Great Expectations service.

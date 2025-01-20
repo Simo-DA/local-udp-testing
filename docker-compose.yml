@@ -69,6 +69,14 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     command: taskmanager
 
+  great_expectations:
+    image: great_expectations:latest
+    container_name: great_expectations
+    volumes:
+      - ./great_expectations:/great_expectations
+    command: great_expectations checkpoint run my_checkpoint
+
 volumes:
   s3bucket:
   postgresdb:
+  great_expectations:
