@@ -8,7 +8,7 @@ Plattform to localy test components and processes for development of the UDP in 
 
 Check if installed and ready
 
-```
+```bash
 docker-compose -v
 ```
 
@@ -16,17 +16,21 @@ docker-compose -v
 
 Check if installed and ready
 
-```
+```bash
 docker-compose -v
 ```
 
 ## Getting started
 
-Create .env file to set your Minio secrets. See .env.example:
+Create .env file to set your secrets. See [.env.example](./.env.example).
 
-```
+```plain
 MINIO_ROOT_USER=***YOUR_USERNAME HERE- Min 3 Chars***
 MINIO_ROOT_PASSWORD=***YOUR_PASSWORD HERE- Min 8 chars***
+
+POSTGRES_USER=***YOUR POSTGRES USER HERE***
+POSTGRES_PASSWORD=***YOUR POSTGRES PASWORD HERE***
+POSTGRES_DB=***YOUR POSTGRES DB HERE***
 
 MINIO_ACCESS_KEY=***YOUR ACCESS_KEY HERE***
 MINIO_SECRET_KEY=***YOUR MINIO_SECRET_KEY HERE***
@@ -35,23 +39,41 @@ RABBITMQ_DEFAULT_USER=***YOUR RABBITMQ_DEFAULT_USER HERE - can be anything eg. `
 RABBITMQ_DEFAULT_PASS=***YOUR RABBITMQ_DEFAULT_PASS HERE - can be anything eg. `guest`***
 ```
 
-# Run Container
+## Run Container
 
 1. Make Sure Docker Desktop is up and running
 2. Start the container with docker-compose
 
-```
+```bash
 docker compose up -d
 ```
 
 Use the --build flag if you want rebuild the container without caching.
 
-```
+```bash
 docker compose up -d --build
 ```
 
-### Ports Services
+### Port Mapping Services
 
-- Minio UI localhost:9001
-- Minio API localhost:9000
-- RabbitMQ
+- MinIO UI [localhost:9001](localhost:9001)
+- MinIO API [localhost:9000](localhost:9000)
+- RabbitMQ messaging [localhost:5672](localhost:5672)
+- RabbitMQ management UI [localhost:15672](localhost:15672)
+- PostgresDB [localhost:5432](localhost:5432)
+
+## Usage
+
+### MinIO
+
+MinIO is used to create a local S3-Bucket service. Got to the [MinIO-UI](https://localhost:9001) and login with the credentials (MINIO_ROOT_USER, MINIO_ROOT_PASSWORD) set in your [.env](./.env) file.
+
+You can manualy add new buckets or create access keys, users and user-roles.
+
+### RabbitMQ
+
+Acces the [RabbitMQ-UI here](localhost:15672).
+
+### PostgresDB
+
+Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use connection settings set in your [.env](./.env) file.
