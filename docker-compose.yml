@@ -12,15 +12,17 @@ services:
       - s3bucket:/data
     command: server /data --console-address ":9001"
 
-  postgresdb:
+  postgres:
     image: postgres:latest
-    container_name: postgresdb
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./postgres/init:/docker-entrypoint-initdb.d/:ro
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -70,17 +72,20 @@ services:
     command: taskmanager
 
   dagster:
-    image: dagster/dagster:latest
-    container_name: dagster
+    build:
+      context: ./dagster
     ports:
       - "3000:3000"
+
     environment:
-      DAGSTER_HOME: /opt/dagster/dagster_home
-    volumes:
-      - dagster:/opt/dagster/dagster_home
-    command: dagit -h 0.0.0.0 -p 3000
+      - DAGSTER_HOME=/app/dagster
+      - DAGSTER_POSTGRES_HOST=postgres
+      - DAGSTER_POSTGRES_PORT=5432
+      - DAGSTER_POSTGRES_USER=postgres
+      - DAGSTER_POSTGRES_PASSWORD=postgres
+      - DAGSTER_POSTGRES_DB=dagster
+    depends_on:
+      - postgres
 
 volumes:
   s3bucket:
-  postgresdb:
-  dagster:
