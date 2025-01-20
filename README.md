@@ -62,6 +62,7 @@ docker compose up -d --build
 - RabbitMQ messaging [localhost:5672](http://localhost:5672)
 - RabbitMQ management UI [localhost:15672](http://localhost:15672)
 - Flink UI [localhost:8081](http://localhost:8081)
+- Dagster UI [localhost:3000](http://localhost:3000)
 
 ## Usage
 
@@ -82,3 +83,7 @@ Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use conne
 ### Flink UI
 
 Acces the [Flink-UI here](http://localhost:8081).
+
+### Dagster
+
+Access the [Dagster UI here](http://localhost:3000). Use Dagster to orchestrate your data pipelines.
