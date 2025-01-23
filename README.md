@@ -8,7 +8,7 @@ Plattform to localy test components and processes for development of the UDP in 
 
 Check if installed and ready
 
-```bashbash
+```bash
 docker -v
 ```
 
