@@ -1,7 +1,7 @@
 services:
-  s3_bucket:
+  s3bucket:
     image: minio/minio:latest
-    container_name: s3_bucket
+    container_name: s3bucket
     ports:
       - "9000:9000" # MinIO console/API
       - "9001:9001" # MinIO console
@@ -9,7 +9,37 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - s3_bucket_data:/data
+      - s3bucket:/data
     command: server /data --console-address ":9001"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # RabbitMQ messaging
+      - "15672:15672" # RabbitMQ management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+  iot-producer:
+    build:
+      context: src/iot-producer
+    container_name: iot-producer
+    depends_on:
+      - rabbitmq
+
+  iot-consumer:
+    build:
+      context: src/iot-consumer
+    container_name: iot-consumer
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    depends_on:
+      - s3bucket
+      - rabbitmq
+
 volumes:
-  s3_bucket_data:
+  s3bucket:

@@ -9,7 +9,7 @@ Plattform to localy test components and processes for development of the UDP in 
 Check if installed and ready
 
 ```
-docker-compose -v
+docker -v
 ```
 
 - Docker Compose (Automaticaly installed with latest Docker Desktop Version)
@@ -25,8 +25,14 @@ docker-compose -v
 Create .env file to set your Minio secrets. See .env.example:
 
 ```
-MINIO_ROOT_USER=***YOUR_USERNAME - Min 3 Chars***
-MINIO_ROOT_PASSWORD=***YOUR_PASSWORD - Min 8 chars***
+MINIO_ROOT_USER=***YOUR_USERNAME HERE- Min 3 Chars***
+MINIO_ROOT_PASSWORD=***YOUR_PASSWORD HERE- Min 8 chars***
+
+MINIO_ACCESS_KEY=***YOUR ACCESS_KEY HERE***
+MINIO_SECRET_KEY=***YOUR MINIO_SECRET_KEY HERE***
+
+RABBITMQ_DEFAULT_USER=***YOUR RABBITMQ_DEFAULT_USER HERE - can be anything eg. `guest`***
+RABBITMQ_DEFAULT_PASS=***YOUR RABBITMQ_DEFAULT_PASS HERE - can be anything eg. `guest`***
 ```
 
 # Run Container
@@ -38,7 +44,14 @@ MINIO_ROOT_PASSWORD=***YOUR_PASSWORD - Min 8 chars***
 docker compose up -d
 ```
 
+Use the --build flag if you want rebuild the container without caching.
+
+```
+docker compose up -d --build
+```
+
 ### Ports Services
 
 - Minio UI localhost:9001
 - Minio API localhost:9000
+- RabbitMQ
