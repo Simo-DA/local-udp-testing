@@ -1,6 +1,30 @@
 # Local UDP Testing
-![alt text](overview.excalidraw.png)
 Plattform to localy test components and processes for development of the UDP in a containerized environment.
+
+## Current State
+
+![alt text](overview.excalidraw.png)
+
+### Connected Services
+
+1. Python Script as IOT-Producer (Docker Container)
+2. RabbitMQ Message Broker (currently only one queue calles "iot-data")
+3. Python File as iot-Consumer (Docker Container)
+4. Minio as S3 bucket Service (currently only 1 bucket called "iot-data")
+
+### Unconnected services
+- postgres db
+- Flink (Real Time Analytics)
+  - Task Manager
+  - Job-Manager
+- Dagster as Orchestration Service
+
+### Open questions
+- How to deploy consumers and producers for RabbitMQ? Current solution with a designated docker container, can´t be the final solution.
+- Can dagster be used to establish rabbit mq and s3_bucket connection?
+- How to connect RabbitMQ iot-data queue to flink?
+- How to connect s3_bucket with postgresdb?
+- How to connect flink with postgres? 
 
 ## Prerequisits
 
