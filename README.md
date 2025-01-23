@@ -1,5 +1,5 @@
 # Local UDP Testing
-
+![alt text](overview.excalidraw.svg)
 Plattform to localy test components and processes for development of the UDP in a containerized environment.
 
 ## Prerequisits
