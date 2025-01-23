@@ -9,7 +9,7 @@ Plattform to localy test components and processes for development of the UDP in 
 Check if installed and ready
 
 ```
-docker-compose -v
+docker -v
 ```
 
 - Docker Compose (Automaticaly installed with latest Docker Desktop Version)
