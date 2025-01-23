@@ -19,7 +19,7 @@ Plattform to localy test components and processes for development of the UDP in 
   - Job-Manager
 - Dagster as Orchestration Service
 
-### Open questions
+### Open **questions**
 - How to deploy consumers and producers for RabbitMQ? Current solution with a designated docker container, can´t be the final solution.
 - Can dagster be used to establish rabbit mq and s3_bucket connection?
 - How to connect RabbitMQ iot-data queue to flink?
