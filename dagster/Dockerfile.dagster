@@ -1,0 +1,17 @@
+# docker/Dockerfile.dagster
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the Dagster project files
+COPY . .
+
+# Set environment variables
+ENV DAGSTER_HOME=/app/dagster
+ENV PYTHONPATH=/app/dagster
+
+CMD ["dagster", "run"]
