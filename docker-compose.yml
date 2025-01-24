@@ -71,21 +71,33 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     command: taskmanager
 
+  dagster-db:
+    image: postgres:latest
+    container_name: dagster-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster
+      POSTGRES_DB: dagster
+    volumes:
+      - ./postgres/init:/docker-entrypoint-initdb.d/:ro
+
   dagster:
     build:
       context: ./dagster
     ports:
       - "3000:3000"
-
     environment:
-      - DAGSTER_HOME=/app/dagster
-      - DAGSTER_POSTGRES_HOST=postgres
-      - DAGSTER_POSTGRES_PORT=5432
-      - DAGSTER_POSTGRES_USER=postgres
-      - DAGSTER_POSTGRES_PASSWORD=postgres
-      - DAGSTER_POSTGRES_DB=dagster
+      DAGSTER_POSTGRES_HOST: dagster-db
+      DAGSTER_POSTGRES_PORT: 5432
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+    volumes:
+      - ./dagster:/opt/dagster/app
     depends_on:
-      - postgres
+      - dagster-db
 
 volumes:
   s3bucket:
