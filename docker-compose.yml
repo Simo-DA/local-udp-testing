@@ -9,20 +9,20 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - s3bucket:/data
+      - ./s3bucket/data:/data
     command: server /data --console-address ":9001"
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - ./postgres/init:/docker-entrypoint-initdb.d/:ro
+  # postgres:
+  #   image: postgres:latest
+  #   container_name: postgres
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #   volumes:
+  #     - ./postgres/init:/docker-entrypoint-initdb.d/:ro
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -35,47 +35,29 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
 
-  iot-producer:
-    build:
-      context: src/iot-producer
-    container_name: iot-producer
-    depends_on:
-      - rabbitmq
+  # flink-jobmanager:
+  #   image: flink:latest
+  #   container_name: flink-jobmanager
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+  #   command: jobmanager
 
-  iot-consumer:
-    build:
-      context: src/iot-consumer
-    container_name: iot-consumer
-    environment:
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-    depends_on:
-      - s3bucket
-      - rabbitmq
-
-  flink-jobmanager:
-    image: flink:latest
-    container_name: flink-jobmanager
-    ports:
-      - "8081:8081"
-    environment:
-      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-    command: jobmanager
-
-  flink-taskmanager:
-    image: flink:latest
-    container_name: flink-taskmanager
-    depends_on:
-      - flink-jobmanager
-    environment:
-      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-    command: taskmanager
+  # flink-taskmanager:
+  #   image: flink:latest
+  #   container_name: flink-taskmanager
+  #   depends_on:
+  #     - flink-jobmanager
+  #   environment:
+  #     - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+  #   command: taskmanager
 
   dagster-db:
     image: postgres:latest
     container_name: dagster-db
     ports:
-      - "5433:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: dagster
       POSTGRES_PASSWORD: dagster
@@ -83,21 +65,80 @@ services:
     volumes:
       - ./postgres/init:/docker-entrypoint-initdb.d/:ro
 
-  dagster:
+  # This service runs the code server that loads your user code.
+  dagster-udp-codespace:
     build:
       context: ./dagster
+      dockerfile: ./Dockerfile_udp_codespace
+    container_name: dagster-udp-codespace
+    image: docker_user_code_image
+    restart: always
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      DAGSTER_POSTGRES_HOST: dagster-db
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: "dagster"
+      DAGSTER_CURRENT_IMAGE: "docker_user_code_image"
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    volumes:
+      - ./dagster/udp:/opt/dagster/udp
+    ports:
+      - "4000:4000"
+
+  # This service runs dagster-webserver.
+  dagster-webserver:
+    build:
+      context: ./dagster
+      dockerfile: ./Dockerfile_dagster
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+    container_name: dagster-webserver
+    expose:
+      - "3000"
     ports:
       - "3000:3000"
     environment:
       DAGSTER_POSTGRES_HOST: dagster-db
-      DAGSTER_POSTGRES_PORT: 5432
       DAGSTER_POSTGRES_USER: dagster
       DAGSTER_POSTGRES_PASSWORD: dagster
       DAGSTER_POSTGRES_DB: dagster
-    volumes:
-      - ./dagster:/opt/dagster/app
+    volumes: # Make docker client accessible so we can terminate containers from the webserver
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
     depends_on:
       - dagster-db
+      - dagster-udp-codespace
+
+  # This service runs the dagster-daemon process, which is responsible for taking runs
+  # off of the queue and launching them, as well as creating runs from schedules or sensors.
+  dagster-daemon:
+    build:
+      context: ./dagster
+      dockerfile: ./Dockerfile_dagster
+    container_name: dagster-daemon
+    entrypoint:
+      - dagster-daemon
+      - run
+    restart: on-failure
+    environment:
+      DAGSTER_POSTGRES_HOST: dagster-db
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+    volumes: # Make docker client accessible so we can launch containers using host docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
+    depends_on:
+      - dagster-db
+      - dagster-udp-codespace
 
 volumes:
   s3bucket:

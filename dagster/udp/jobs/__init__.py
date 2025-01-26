@@ -1,4 +1,4 @@
 from dagster import define_asset_job
-from ..assets.mock_iot_data import mock_iot_data
+from assets.rabbit_mq_producer import rabbit_mq_producer
 
-create_iot_data_job = define_asset_job("create_iot_data_job", selection=[mock_iot_data])
+produce_iot_data = define_asset_job("produce_iot_data", selection=[rabbit_mq_producer])

@@ -11,12 +11,11 @@ storage:
         env: DAGSTER_POSTGRES_DB
       port: 5432
 
-# compute_logs:
-#   module: dagster_aws.s3.compute_log_manager
-#   class: S3ComputeLogManager
-#   config:
-#     bucket: "mycorp-dagster-compute-logs"
-#     prefix: "dagster-test-"
+compute_logs:
+  module: dagster.core.storage.local_compute_log_manager
+  class: LocalComputeLogManager
+  config:
+    base_dir: /path/to/compute/logs
 
 local_artifact_storage:
   module: dagster.core.storage.root
