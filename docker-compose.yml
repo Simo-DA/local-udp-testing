@@ -9,20 +9,21 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - ./s3bucket/data:/data
+      - ./src/s3bucket/data/.minio.sys:/data/.minio.sys
     command: server /data --console-address ":9001"
 
-  # postgres:
-  #   image: postgres:latest
-  #   container_name: postgres
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #   volumes:
-  #     - ./postgres/init:/docker-entrypoint-initdb.d/:ro
+  postgres-db:
+    image: postgres:latest
+    container_name: postgres-db
+    hostname: ${POSTGRES_HOST}
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./src/postgres/init:/docker-entrypoint-initdb.d/:ro
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -32,8 +33,10 @@ services:
       - "5672:5672" # RabbitMQ messaging
       - "15672:15672" # RabbitMQ management UI
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - ./src/rabbitmq/data:/var/lib/rabbitmq
 
   # flink-jobmanager:
   #   image: flink:latest
@@ -53,44 +56,38 @@ services:
   #     - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
   #   command: taskmanager
 
-  dagster-db:
-    image: postgres:latest
-    container_name: dagster-db
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: dagster
-      POSTGRES_PASSWORD: dagster
-      POSTGRES_DB: dagster
-    volumes:
-      - ./postgres/init:/docker-entrypoint-initdb.d/:ro
-
   # This service runs the code server that loads your user code.
   dagster-udp-codespace:
     build:
-      context: ./dagster
+      context: ./src/dagster
       dockerfile: ./Dockerfile_udp_codespace
     container_name: dagster-udp-codespace
     image: docker_user_code_image
     restart: always
     environment:
-      RABBITMQ_HOST: rabbitmq
-      DAGSTER_POSTGRES_HOST: dagster-db
-      DAGSTER_POSTGRES_USER: dagster
-      DAGSTER_POSTGRES_PASSWORD: dagster
-      DAGSTER_POSTGRES_DB: "dagster"
-      DAGSTER_CURRENT_IMAGE: "docker_user_code_image"
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      DAGSTER_DB_NAME: ${DAGSTER_DB_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DAGSTER_CURRENT_IMAGE: docker_user_code_image
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     volumes:
-      - ./dagster/udp:/opt/dagster/udp
+      - ./src/dagster/udp:/opt/dagster/udp
     ports:
       - "4000:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # This service runs dagster-webserver.
   dagster-webserver:
     build:
-      context: ./dagster
+      context: ./src/dagster
       dockerfile: ./Dockerfile_dagster
     entrypoint:
       - dagster-webserver
@@ -106,22 +103,24 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DAGSTER_POSTGRES_HOST: dagster-db
-      DAGSTER_POSTGRES_USER: dagster
-      DAGSTER_POSTGRES_PASSWORD: dagster
-      DAGSTER_POSTGRES_DB: dagster
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DAGSTER_DB_NAME: ${DAGSTER_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DAGSTER_CURRENT_IMAGE: docker_user_code_image
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/io_manager_storage:/tmp/io_manager_storage
     depends_on:
-      - dagster-db
+      - ${POSTGRES_HOST}
       - dagster-udp-codespace
 
   # This service runs the dagster-daemon process, which is responsible for taking runs
   # off of the queue and launching them, as well as creating runs from schedules or sensors.
   dagster-daemon:
     build:
-      context: ./dagster
+      context: ./src/dagster
       dockerfile: ./Dockerfile_dagster
     container_name: dagster-daemon
     entrypoint:
@@ -129,16 +128,14 @@ services:
       - run
     restart: on-failure
     environment:
-      DAGSTER_POSTGRES_HOST: dagster-db
-      DAGSTER_POSTGRES_USER: dagster
-      DAGSTER_POSTGRES_PASSWORD: dagster
-      DAGSTER_POSTGRES_DB: dagster
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DAGSTER_DB_NAME: ${DAGSTER_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes: # Make docker client accessible so we can launch containers using host docker
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/io_manager_storage:/tmp/io_manager_storage
     depends_on:
-      - dagster-db
+      - ${POSTGRES_HOST}
       - dagster-udp-codespace
-
-volumes:
-  s3bucket:

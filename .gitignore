@@ -1,3 +1,2 @@
 .env
 **pycache**
-s3bucket/data/iot-data/*
