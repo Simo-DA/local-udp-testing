@@ -9,7 +9,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - ./src/s3bucket/data/.minio.sys:/data/.minio.sys
+      - ./src/s3bucket/data/:/data/
     command: server /data --console-address ":9001"
 
   postgres-db:
@@ -139,3 +139,6 @@ services:
     depends_on:
       - ${POSTGRES_HOST}
       - dagster-udp-codespace
+
+volumes:
+  s3bucket:
