@@ -34,7 +34,7 @@ Plattform to localy test components and processes for development of the UDP in 
 
 ### Open **questions**
 
-- How to deploy rabbit mq producers? Currently continuous materialization in dagster. Goog solution?
+- How to deploy rabbit mq producers? Currently continuous materialization in dagster. Good solution?
 - How to connect RabbitMQ iot-data queue to flink?
 - How to connect s3_bucket with postgresdb?
 - How to connect flink with postgres?
@@ -157,5 +157,5 @@ Access the [Dagster UI here](http://localhost:3000). Use Dagster to orchestrate 
 #### Bind Mount
 
 
- and Project Structure
+#### Project Structure
 <hr style="height:1px;">
