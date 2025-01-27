@@ -8,14 +8,15 @@ Plattform to localy test components and processes for development of the UDP in 
 
 ### Connected Services
 
-1. rabbitmq Message Broker ( currently one queue: "iot-data")
-2. s3bucket (MinIO)
+1. How to persist config without other meta data? (S3 + rabbitmq)
+2. rabbitmq Message Broker ( currently one queue: "iot-data")
+3. s3bucket (MinIO)
    1. "iot-data" - bucket
    2. AccesKey and Secret manualy created (persisted with mount in s3bucket folder)
-3. postgres-db
+4. postgres-db
    1. postgres database (unused)
    2. dagster database (used by dagster)
-4. Dagster as Data Pipeline Orchestrator
+5. Dagster as Data Pipeline Orchestrator
    1. iot-produce job (scheduled every minute)
       1. rabbit-mq-producer asset
    2. rabbitMQ-consumer asset manualy materialized. Runs continuosly (iot-data queue -> iot-data bucket)
