@@ -9,18 +9,21 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - s3bucket:/data
+      - ./src/s3bucket/data:/data/
     command: server /data --console-address ":9001"
 
-  postgresdb:
+  postgres-db:
     image: postgres:latest
-    container_name: postgresdb
+    container_name: postgres-db
+    hostname: ${POSTGRES_HOST}
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./src/postgres/init:/docker-entrypoint-initdb.d/
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -30,26 +33,97 @@ services:
       - "5672:5672" # RabbitMQ messaging
       - "15672:15672" # RabbitMQ management UI
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - ./src/rabbitmq/data/mnesia:/var/lib/rabbitmq/mnesia
 
-  iot-producer:
+  # This service runs the code server that loads your user code.
+  dagster-udp-codespace:
     build:
-      context: src/iot-producer
-    container_name: iot-producer
-    depends_on:
-      - rabbitmq
-
-  iot-consumer:
-    build:
-      context: src/iot-consumer
-    container_name: iot-consumer
+      context: ./src/dagster
+      dockerfile: ./Dockerfile_udp_codespace
+    container_name: dagster-udp-codespace
+    image: docker_user_code_image
+    restart: always
     environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      DAGSTER_DB_NAME: ${DAGSTER_DB_NAME}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DAGSTER_CURRENT_IMAGE: docker_user_code_image
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+    volumes:
+      - ./src/dagster/udp:/opt/dagster/udp
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # This service runs dagster-webserver.
+  dagster-webserver:
+    build:
+      context: ./src/dagster
+      dockerfile: ./Dockerfile_dagster
+    entrypoint:
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+    container_name: dagster-webserver
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DAGSTER_DB_NAME: ${DAGSTER_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DAGSTER_CURRENT_IMAGE: docker_user_code_image
+
+    volumes: # Make docker client accessible so we can terminate containers from the webserver
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
     depends_on:
-      - s3bucket
-      - rabbitmq
+      - ${POSTGRES_HOST}
+      - dagster-udp-codespace
+
+  # This service runs the dagster-daemon process, which is responsible for taking runs
+  # off of the queue and launching them, as well as creating runs from schedules or sensors.
+  dagster-daemon:
+    build:
+      context: ./src/dagster
+      dockerfile: ./Dockerfile_dagster
+    container_name: dagster-daemon
+    entrypoint:
+      - dagster-daemon
+      - run
+    restart: on-failure
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      DAGSTER_DB_NAME: ${DAGSTER_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    volumes: # Make docker client accessible so we can launch containers using host docker
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/io_manager_storage:/tmp/io_manager_storage
+    depends_on:
+      - ${POSTGRES_HOST}
+      - dagster-udp-codespace
 
   flink-jobmanager:
     image: flink:latest
@@ -68,7 +142,3 @@ services:
     environment:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     command: taskmanager
-
-volumes:
-  s3bucket:
-  postgresdb:

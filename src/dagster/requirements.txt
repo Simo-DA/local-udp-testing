@@ -1,0 +1,7 @@
+pika
+dagster
+dagster-aws
+dagster-docker
+dagster-postgres 
+    
+    
