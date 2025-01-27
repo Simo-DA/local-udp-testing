@@ -24,13 +24,14 @@ def mock_iot_message(device_id: str) -> dict[str, Union[str, float, int]]:
     return message
 
 
-@asset
+@asset(
+    description="Produce sample IoT data and publish it to RabbitMQ´s iot-data queue"
+)
 def rabbit_mq_producer(context, rabbitmq_channel: ResourceParam) -> None:
     queue: str = "iot-data"
     message: dict = mock_iot_message(1)
-    
+
     channel = rabbitmq_channel.get_channel(queue)
     context.log.info(f"Connected to RabbitMQ")
     channel.basic_publish(exchange="", routing_key=queue, body=json.dumps(message))
     context.log.info(f"Published message: {message}")
-    

@@ -9,7 +9,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes:
-      - ./src/s3bucket/data/:/data/
+      - ./src/s3bucket/data:/data/
     command: server /data --console-address ":9001"
 
   postgres-db:
@@ -38,24 +38,6 @@ services:
     volumes:
       - ./src/rabbitmq/data:/var/lib/rabbitmq
 
-  # flink-jobmanager:
-  #   image: flink:latest
-  #   container_name: flink-jobmanager
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-  #   command: jobmanager
-
-  # flink-taskmanager:
-  #   image: flink:latest
-  #   container_name: flink-taskmanager
-  #   depends_on:
-  #     - flink-jobmanager
-  #   environment:
-  #     - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-  #   command: taskmanager
-
   # This service runs the code server that loads your user code.
   dagster-udp-codespace:
     build:
@@ -74,6 +56,7 @@ services:
       DAGSTER_CURRENT_IMAGE: docker_user_code_image
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
     volumes:
       - ./src/dagster/udp:/opt/dagster/udp
     ports:
@@ -142,5 +125,26 @@ services:
       - ${POSTGRES_HOST}
       - dagster-udp-codespace
 
-volumes:
-  s3bucket:
+  flink-jobmanager:
+    image: flink:latest
+    container_name: flink-jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    command: jobmanager
+
+  flink-taskmanager:
+    image: flink:latest
+    container_name: flink-taskmanager
+    depends_on:
+      - flink-jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    command: taskmanager
+
+  zeppelin:
+    image: apache/zeppelin:0.11.2
+    container_name: zeppelin
+    ports:
+      - "8080:8080"
