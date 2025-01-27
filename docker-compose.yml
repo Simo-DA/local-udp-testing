@@ -23,7 +23,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./src/postgres/init:/docker-entrypoint-initdb.d/:ro
+      - ./src/postgres/init:/docker-entrypoint-initdb.d/
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -36,7 +36,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     volumes:
-      - ./src/rabbitmq/data:/var/lib/rabbitmq
+      - ./src/rabbitmq/data/mnesia:/var/lib/rabbitmq/mnesia
 
   # This service runs the code server that loads your user code.
   dagster-udp-codespace:
