@@ -58,29 +58,8 @@ docker-compose -v
 
 ## Getting started
 
-Create .env file to set your secrets. You can simply copy the [.env.example](./.env.example) and rename it. Currently all the secrets are already set.
+Necessary Secrets are already created in the [.env](./.env). So you only need to run the container.
 
-```
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=minioadmin
-MINIO_ENDPOINT=http://s3bucket:9000
-
-POSTGRES_HOST=postgres-db
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=postgres
-POSTGRES_PORT=5432
-
-DAGSTER_DB_NAME=dagster
-
-RABBITMQ_HOST=rabbitmq
-RABBITMQ_PORT=5672
-RABBITMQ_USER=guest
-RABBITMQ_PASS=guest
-
-MINIO_ACCESS_KEY=gE9RBtE6FX84LvmXBDQC
-MINIO_SECRET_KEY=dG0OTjgZfxuKAn2uYbLk2p71fuLJpm1ScOHPw9IW
-```
 
 ## Run Container
 
