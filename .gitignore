@@ -1,3 +1,4 @@
 .env
 **pycache**
 iot-data
+!iot-data/.txt

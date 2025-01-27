@@ -129,17 +129,11 @@ The containers data folder is connected to the local [src/s3bucket/data](src/s3b
 
 Acces the [RabbitMQ-UI here](http://localhost:15672) and login with the creadentials set for RABBITMQ_USER and RABBITMQ_PASS in your [.env](./.env) file. The default value is guest for both user and pass.
 
-#### Bind-Mount
-
-The containers rabbitmq folder is connected to the local [src/rabbitmq](src/rabbitmwq)-folder. That way the iot-data queue can be persisted between runs and shared over the repository.
-
 <hr style="height:1px;">
 
 ### PostgresDB
 
 Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use connection settings set in your [.env](./.env) file.
-
-#### Bind Mount
 
 <hr style="height:1px;">
 

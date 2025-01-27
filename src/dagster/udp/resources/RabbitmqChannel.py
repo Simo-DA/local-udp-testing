@@ -12,5 +12,4 @@ class RabbitmqChannel(ConfigurableResource):
         connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_host))
         channel = connection.channel()
         channel.queue_declare(queue=queue, durable=True)
-
         return channel

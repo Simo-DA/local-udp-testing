@@ -35,8 +35,6 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    volumes:
-      - ./src/rabbitmq/data/mnesia:/var/lib/rabbitmq/mnesia
 
   # This service runs the code server that loads your user code.
   dagster-udp-codespace:
