@@ -18,12 +18,10 @@ Plattform to localy test components and processes for development of the UDP in 
 4. Dagster as Data Pipeline Orchestrator
    1. iot-produce job (scheduled every minute)
       1. rabbit-mq-producer asset
-      2.
    2. rabbitMQ-consumer asset manualy materialized. Runs continuosly (iot-data queue -> iot-data bucket)
    3. Ressources
       1. RabbitMQ_channel
       2. s3_client
-      3.
 
 ### Unconnected services
 
@@ -34,7 +32,7 @@ Plattform to localy test components and processes for development of the UDP in 
 
 ### Open **questions**
 
-- How to deploy rabbit mq producers? Currently continuous materialization in dagster. Good solution?
+- How to deploy rabbit mq consumer? Currently continuous materialization in dagster. Good solution?
 - How to connect RabbitMQ iot-data queue to flink?
 - How to connect s3_bucket with postgresdb?
 - How to connect flink with postgres?
@@ -156,6 +154,6 @@ Access the [Dagster UI here](http://localhost:3000). Use Dagster to orchestrate 
 
 #### Bind Mount
 
-
 #### Project Structure
+
 <hr style="height:1px;">
