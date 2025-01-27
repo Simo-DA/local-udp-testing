@@ -142,9 +142,3 @@ services:
     environment:
       - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
     command: taskmanager
-
-  zeppelin:
-    image: apache/zeppelin:0.11.2
-    container_name: zeppelin
-    ports:
-      - "8080:8080"
