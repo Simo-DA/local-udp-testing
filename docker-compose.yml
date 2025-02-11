@@ -17,7 +17,7 @@ services:
     container_name: postgres-db
     hostname: ${POSTGRES_HOST}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -124,8 +124,11 @@ services:
       - dagster-udp-codespace
 
   flink-jobmanager:
-    image: flink:latest
+    build:
+        context: ./src/flink
     container_name: flink-jobmanager
+    volumes:
+      - ./src/flink/udp:/opt/flink/examples/python/udp
     ports:
       - "8081:8081"
     environment:
@@ -133,8 +136,11 @@ services:
     command: jobmanager
 
   flink-taskmanager:
-    image: flink:latest
+    build:
+        context: ./src/flink
     container_name: flink-taskmanager
+    volumes:
+      - ./src/flink/udp:/opt/flink/examples/udp
     depends_on:
       - flink-jobmanager
     environment:

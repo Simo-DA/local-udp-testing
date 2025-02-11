@@ -82,7 +82,7 @@ docker compose up -d --build
 
 - MinIO UI [localhost:9001](http://localhost:9001)
 - MinIO API [localhost:9000](http://localhost:9000)
-- PostgresDB [localhost:5432](http://localhost:5432)
+- PostgresDB [localhost:5433](http://localhost:5433)
 - RabbitMQ messaging [localhost:5672](http://localhost:5672)
 - RabbitMQ management UI [localhost:15672](http://localhost:15672)
 - Flink UI [localhost:8081](http://localhost:8081)
@@ -119,6 +119,8 @@ Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use conne
 ### Flink UI
 
 Acces the [Flink-UI here](http://localhost:8081).
+
+To submit a job, type inside a terminal of the container: flink run -m flink-jobmanager:8081 -py /opt/flink/examples/python/udp/rabbitmq_consumer.py
 
 <hr style="height:1px;">
 
