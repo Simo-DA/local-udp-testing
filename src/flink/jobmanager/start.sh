@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e  # Exit if any command fails
- 
+
 echo "Starting Flink JobManager..."
 /docker-entrypoint.sh jobmanager &  # Start Flink JobManager in the background
- 
+
 echo "Submitting PyFlink jobs..."
 for job in /opt/flink/jobs/*.py; do
     if [ -f "$job" ]; then
@@ -14,7 +14,7 @@ for job in /opt/flink/jobs/*.py; do
         echo "No Python jobs found in /opt/flink/jobs/"
     fi
 done
- 
+
 echo "All jobs submitted!"
- 
+
 wait  # Keep the script running by waiting for background processes
