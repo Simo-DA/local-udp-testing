@@ -23,20 +23,22 @@ Plattform to localy test components and processes for development of the UDP in 
    3. Ressources
       1. RabbitMQ_channel
       2. s3_client
+6. Flink (Real Time Transformations)
+   1. Flink Jobmanager
+   2. Flink Taskmanager
 
 ### Unconnected services
 
-- Flink (Real Time Analytics) -> skeleton already in docker-compose
-  - Task Manager
-  - Job-Manager
 - Great Expecations
+- Airbyte
+- PG Analytics
 
 ### Open **questions**
 
 - How to deploy rabbit mq consumer? Currently continuous materialization in dagster. Good solution?
-- How to connect RabbitMQ iot-data queue to flink?
+- How to create postgres sink in flink job?
+- Compatability of rabbitmqconnector (v1.17) with latest flink version (1.20)
 - How to connect s3_bucket with postgresdb?
-- How to connect flink with postgres?
 
 ## Prerequisits
 
@@ -59,7 +61,6 @@ docker-compose -v
 ## Getting started
 
 Necessary Secrets are already created in the [.env](./.env). So you only need to run the container.
-
 
 ## Run Container
 
@@ -120,7 +121,29 @@ Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use conne
 
 Acces the [Flink-UI here](http://localhost:8081).
 
-To submit a job, type inside a terminal of the container: flink run -m flink-jobmanager:8081 -py /opt/flink/jobs/rabbitmq_consumer.py
+Both Flink services (Taskmanager and Jobmanager) are built with the same [Dockerfile](src\flink\Dockerfile).
+
+#### Flink Jobmanager
+
+Responsible to start and manage Flink Jobs. There is usually only one Jobmanager and you can have several Taskmanagers to run the jobs.
+
+#### Flink Taskmanager
+
+Is actually running the task. Worker node? --> further research necessary
+
+#### Job Submission
+
+The Job submission is automated with the [start.sh](src\flink\jobmanager\start.sh) which is mounted to the container and defined as entrypoint for the Jobmanager service in [Docker-Compose]("docker-compose.yml"). Thereby all files inside the flink/jobs/ folder are automaticaly ran, when the container is started.
+
+-> Errors in Scripts will kill the whole Jobmanager service!!!
+
+##### Manually submitting Jobs
+
+To manually submit a job use the following command inside the containers terminal:
+
+```
+flink run -m flink-jobmanager:8081 -py /path/to/your/job/in/container/example_job.py
+```
 
 <hr style="height:1px;">
 
