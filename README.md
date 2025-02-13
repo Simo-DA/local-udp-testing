@@ -82,7 +82,7 @@ docker compose up -d --build
 
 - MinIO UI [localhost:9001](http://localhost:9001)
 - MinIO API [localhost:9000](http://localhost:9000)
-- PostgresDB [localhost:5433](http://localhost:5433)
+- PostgresDB [localhost:5432](http://localhost:5432)
 - RabbitMQ messaging [localhost:5672](http://localhost:5672)
 - RabbitMQ management UI [localhost:15672](http://localhost:15672)
 - Flink UI [localhost:8081](http://localhost:8081)
