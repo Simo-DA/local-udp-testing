@@ -150,17 +150,19 @@ services:
 
   flink-jobmanager:
     build:
-      context: ./src/flink
+        context: ./src/flink
     container_name: flink-jobmanager
+    volumes:
+      - ./src/flink/jobs:/opt/flink/jobs
+      - ./src/flink/jobmanager:/opt/flink/jobmanager
+    entrypoint: ["/bin/bash", "/opt/flink/jobmanager/start.sh"]
     ports:
       - "8081:8081"
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
-    entrypoint: ["/bin/bash", "/opt/home/job-manager/start.sh"]
+      JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
     command: jobmanager
-    volumes:
-      - ./src/flink/jobs:/opt/flink/jobs
-      - ./src/flink/job-manager:/opt/home/job-manager
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081"]
       interval: 30s
@@ -169,8 +171,10 @@ services:
 
   flink-taskmanager:
     build:
-      context: ./src/flink
+        context: ./src/flink
     container_name: flink-taskmanager
+    volumes:
+      - ./src/flink/jobs:/opt/flink/jobs
     depends_on:
       - flink-jobmanager
     environment:

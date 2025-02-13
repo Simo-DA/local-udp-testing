@@ -1,10 +1,33 @@
-FROM pyflink/playgrounds:1.13.0-rc2
 
-# Download the RabbitMQ connector JAR file
-RUN wget -O /opt/flink/lib/rabbitmq.jar https://repo.maven.apache.org/maven2/org/apache/flink/flink-connector-rabbitmq_2.12/1.13.0/flink-connector-rabbitmq_2.12-1.13.0.jar
+FROM flink:1.17.2
 
-# Download the amqp-client JAR file
-RUN wget -O /opt/flink/lib/amqp-client-5.13.0.jar https://repo1.maven.org/maven2/com/rabbitmq/amqp-client/5.13.0/amqp-client-5.13.0.jar
+# Install Python and pip
+RUN apt-get update && apt-get install -y python3.10 python3-pip
 
-# Set the CLASSPATH environment variable
-ENV CLASSPATH /opt/flink/lib/rabbitmq.jar:/opt/flink/lib/amqp-client-5.13.0.jar
+# Ensure python command points to python3.10
+RUN ln -s /usr/bin/python3.10 /usr/bin/python
+
+# Install PyFlink
+RUN python -m pip install --no-cache-dir apache-flink==1.17.2
+
+# Define JAR versions
+ARG FLINK_LIB_DIR="/opt/flink/lib"
+ARG RABBITMQ_JAR_VERSION="3.0.1-1.17"
+# ARG JDBC_JAR_VERSION="3.1.2-1.17"
+# ARG POSTGRES_JAR_VERSION="42.7.5"
+
+# Download RabbitMQ Connector JAR
+RUN curl -fsSL "https://repo.maven.apache.org/maven2/org/apache/flink/flink-sql-connector-rabbitmq/${RABBITMQ_JAR_VERSION}/flink-sql-connector-rabbitmq-${RABBITMQ_JAR_VERSION}.jar" \
+    -o "${FLINK_LIB_DIR}/flink-sql-connector-rabbitmq-${RABBITMQ_JAR_VERSION}.jar"
+
+# # Download PostgreSQL JDBC Connector JAR
+# RUN curl -fsSL "https://jdbc.postgresql.org/download/postgresql-${POSTGRES_JAR_VERSION}.jar" \
+#     -o "${FLINK_LIB_DIR}/postgresql-jdbc.jar"
+
+# # Download Flink JDBC Connector JAR
+# RUN curl -fsSL "https://repo.maven.apache.org/maven2/org/apache/flink/flink-connector-jdbc/${JDBC_JAR_VERSION}/flink-connector-jdbc-${JDBC_JAR_VERSION}.jar" \
+#     -o "${FLINK_LIB_DIR}/flink-connector-jdbc-${JDBC_JAR_VERSION}.jar"
+
+#COPY postgresql-42.7.5.jar /opt/flink/lib/postgresql-42.7.5.jar
+
+WORKDIR /opt/flink/jobs
