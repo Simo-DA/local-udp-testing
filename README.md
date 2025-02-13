@@ -37,7 +37,7 @@ Plattform to localy test components and processes for development of the UDP in 
 
 - How to deploy rabbit mq consumer? Currently continuous materialization in dagster. Good solution?
 - How to create postgres sink in flink job?
-- Compatability of rabbitmqconnector (v1.17) with latest flink version (1.20)
+- Compatability of RabbitMQ-Connector (v1.17) with latest flink version (1.20)
 - How to connect s3_bucket with postgresdb?
 
 ## Prerequisits
@@ -139,7 +139,7 @@ The Job submission is automated with the [start.sh](src\flink\jobmanager\start.s
 
 ##### Manually submitting Jobs
 
-To manually submit a job use the following command inside the containers terminal:
+To manually submit a job run the following command inside the containers terminal:
 
 ```
 flink run -m flink-jobmanager:8081 -py /path/to/your/job/in/container/example_job.py
