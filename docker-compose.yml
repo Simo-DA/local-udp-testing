@@ -162,6 +162,8 @@ services:
       JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
     command: jobmanager
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081"]
