@@ -23,20 +23,22 @@ Plattform to localy test components and processes for development of the UDP in 
    3. Ressources
       1. RabbitMQ_channel
       2. s3_client
+6. Flink (Real Time Transformations)
+   1. Flink Jobmanager
+   2. Flink Taskmanager
 
 ### Unconnected services
 
-- Flink (Real Time Analytics) -> skeleton already in docker-compose
-  - Task Manager
-  - Job-Manager
 - Great Expecations
+- Airbyte
+- PG Analytics
 
 ### Open **questions**
 
 - How to deploy rabbit mq consumer? Currently continuous materialization in dagster. Good solution?
-- How to connect RabbitMQ iot-data queue to flink?
+- How to create postgres sink in flink job?
+- Compatability of RabbitMQ-Connector (v1.17) with latest flink version (1.20)
 - How to connect s3_bucket with postgresdb?
-- How to connect flink with postgres?
 
 ## Prerequisits
 
@@ -59,7 +61,6 @@ docker-compose -v
 ## Getting started
 
 Necessary Secrets are already created in the [.env](./.env). So you only need to run the container.
-
 
 ## Run Container
 
@@ -120,11 +121,57 @@ Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use conne
 
 Acces the [Flink-UI here](http://localhost:8081).
 
+Both Flink services (Taskmanager and Jobmanager) are built with the same [Dockerfile](src\flink\Dockerfile).
+
+#### Flink Jobmanager
+
+Responsible to start and manage Flink Jobs. There is usually only one Jobmanager and you can have several Taskmanagers to run the jobs.
+
+#### Flink Taskmanager
+
+Is actually running the task. Worker node? --> further research necessary
+
+#### Job Submission
+
+The Job submission is automated with the [start.sh](src\flink\jobmanager\start.sh) which is mounted to the container and defined as entrypoint for the Jobmanager service in [Docker-Compose]("docker-compose.yml"). Thereby all files inside the flink/jobs/ folder are automaticaly ran, when the container is started.
+
+-> Errors in Scripts will kill the whole Jobmanager service!!!
+
+##### Manually submitting Jobs
+
+To manually submit a job run the following command inside the containers terminal:
+
+```
+flink run -m flink-jobmanager:8081 -py /path/to/your/job/in/container/example_job.py
+```
+
 <hr style="height:1px;">
 
 ### Dagster
 
 Access the [Dagster UI here](http://localhost:3000). Use Dagster to orchestrate your data pipelines.
+
+#### Assets
+
+Smalles building blocks of Dagster Jobs. Naming should be
+
+#### Jobs
+
+Tasks that can be ran by automated with schedules. Can consist of one or many assets.
+
+#### Ressources
+
+Reusable connections configurations for common services (postgres, s3, rabbitmq).
+
+#### Schedules
+
+Plans (eg. cron jobst) to automaticly run Dagster Jobs.
+
+#### Definitions.py
+
+[Definitions.py](src\dagster\udp\definitions.py) is used to collect all building blocks (assets, jobs, ressources and schedules) for one Code Space. They are only accesible for docker if they are collected here.
+
+Different Code Spaces are used if dependencies of projects differ grately or should rather by managed seperatly.
 
 #### Bind Mount
 

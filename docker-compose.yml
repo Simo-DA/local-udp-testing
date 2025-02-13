@@ -124,17 +124,32 @@ services:
       - dagster-udp-codespace
 
   flink-jobmanager:
-    image: flink:latest
+    build:
+        context: ./src/flink
     container_name: flink-jobmanager
+    volumes:
+      - ./src/flink/jobs:/opt/flink/jobs
+      - ./src/flink/jobmanager:/opt/flink/jobmanager
+    entrypoint: ["/bin/bash", "/opt/flink/jobmanager/start.sh"]
     ports:
       - "8081:8081"
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
     command: jobmanager
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   flink-taskmanager:
-    image: flink:latest
+    build:
+        context: ./src/flink
     container_name: flink-taskmanager
+    volumes:
+      - ./src/flink/jobs:/opt/flink/jobs
     depends_on:
       - flink-jobmanager
     environment:
