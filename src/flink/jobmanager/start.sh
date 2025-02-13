@@ -1,4 +1,4 @@
-#!/bin/bash
+
 set -e  # Exit if any command fails
 
 echo "Starting Flink JobManager..."
