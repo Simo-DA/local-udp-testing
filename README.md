@@ -120,7 +120,7 @@ Use Database-Management-Tool (eg. PGAdmin) to connect to the Databese. Use conne
 
 Acces the [Flink-UI here](http://localhost:8081).
 
-To submit a job, type inside a terminal of the container: flink run -m flink-jobmanager:8081 -py /opt/flink/examples/python/udp/rabbitmq_consumer.py
+To submit a job, type inside a terminal of the container: flink run -m flink-jobmanager:8081 -py /opt/flink/jobs/rabbitmq_consumer.py
 
 <hr style="height:1px;">
 

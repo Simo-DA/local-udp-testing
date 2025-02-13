@@ -27,32 +27,34 @@ rmq_source = RMQSource(
 # Add Source to Stream
 stream = env.add_source(rmq_source)
 
+
+
 # Convert raw stream into a format suitable for PostgreSQL
 # Assume messages are simple strings (e.g., sensor readings)
-formatted_stream = stream.map(lambda msg: (msg,), output_type=Types.TUPLE([Types.STRING()]))
+# formatted_stream = stream.map(lambda msg: (msg,), output_type=Types.TUPLE([Types.STRING()]))
 
 # Define PostgreSQL Sink
-jdbc_sink = JdbcSink.sink(
-    "INSERT INTO iot_messages (message) VALUES (?)",
-    Types.ROW([Types.STRING()]),  # Map data to SQL
-    JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-        .with_url("jdbc:postgresql://postgres-db:5432/mydatabase")  # Update DB name if needed
-        .with_driver_name("org.postgresql.Driver")
-        .with_user_name("postgres")
-        .with_password("postgres")
-        .build(),
-    JdbcExecutionOptions.builder()
-        .with_batch_interval_ms(1000)
-        .with_batch_size(5)
-        .with_max_retries(3)
-        .build()
-)
+# jdbc_sink = JdbcSink.sink(
+#     "INSERT INTO iot_messages (message) VALUES (?)",
+#     Types.ROW([Types.STRING()]),  # Map data to SQL
+#     JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+#         .with_url("jdbc:postgresql://postgres-db:5432/mydatabase")  # Update DB name if needed
+#         .with_driver_name("org.postgresql.Driver")
+#         .with_user_name("postgres")
+#         .with_password("postgres")
+#         .build(),
+#     JdbcExecutionOptions.builder()
+#         .with_batch_interval_ms(1000)
+#         .with_batch_size(5)
+#         .with_max_retries(3)
+#         .build()
+# )
 
-# Add Sink to Stream
-formatted_stream.add_sink(jdbc_sink)
+# # Add Sink to Stream
+# formatted_stream.add_sink(jdbc_sink)
 
 # Process the stream (print for now)
-#stream.print()
+stream.print()
 
 # Execute the PyFlink job
 env.execute("RabbitMQ to PostgreSQL Streaming Job")
