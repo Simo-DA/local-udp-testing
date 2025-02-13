@@ -9,8 +9,8 @@ env = StreamExecutionEnvironment.get_execution_environment()
 
 # RabbitMQ Connection Configuration
 rmq_connection = RMQConnectionConfig.Builder() \
-    .set_host("rabbitmq") \
-    .set_port(5672) \
+    .set_host(RABBITMQ_HOST) \
+    .set_port(RABBITMQ_PORT) \
     .set_virtual_host("/") \
     .set_user_name("guest") \
     .set_password("guest") \
