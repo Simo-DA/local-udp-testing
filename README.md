@@ -151,6 +151,28 @@ flink run -m flink-jobmanager:8081 -py /path/to/your/job/in/container/example_jo
 
 Access the [Dagster UI here](http://localhost:3000). Use Dagster to orchestrate your data pipelines.
 
+#### Assets
+
+Smalles building blocks of Dagster Jobs. Naming should be
+
+#### Jobs
+
+Tasks that can be ran by automated with schedules. Can consist of one or many assets.
+
+#### Ressources
+
+Reusable connections configurations for common services (postgres, s3, rabbitmq).
+
+#### Schedules
+
+Plans (eg. cron jobst) to automaticly run Dagster Jobs.
+
+#### Definitions.py
+
+[Definitions.py](src\dagster\udp\definitions.py) is used to collect all building blocks (assets, jobs, ressources and schedules) for one Code Space. They are only accesible for docker if they are collected here.
+
+Different Code Spaces are used if dependencies of projects differ grately or should rather by managed seperatly.
+
 #### Bind Mount
 
 #### Project Structure
