@@ -3,6 +3,10 @@ from pyflink.common.serialization import SimpleStringSchema
 from pyflink.datastream.connectors.rabbitmq import RMQSource, RMQConnectionConfig
 from pyflink.datastream.connectors.jdbc import JdbcSink, JdbcConnectionOptions, JdbcExecutionOptions
 from pyflink.common.typeinfo import Types
+import os
+
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
+RABBITMQ_PORT = int(os.getenv("RABBITMQ_PORT"))
 
 # Initialize StreamExecutionEnvironment
 env = StreamExecutionEnvironment.get_execution_environment()
