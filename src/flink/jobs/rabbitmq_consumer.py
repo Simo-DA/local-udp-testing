@@ -1,13 +1,14 @@
+import os
+import json
+from datetime import datetime
+
+from pyflink.table import Row
+from pyflink.common.typeinfo import Types
 from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.datastream.connectors.rabbitmq import RMQSource, RMQConnectionConfig
 from pyflink.datastream.connectors.jdbc import JdbcSink, JdbcConnectionOptions, JdbcExecutionOptions
-from pyflink.common.typeinfo import Types
-from pyflink.table import Row
 
-import os
-from datetime import datetime
-import json
 
 RABBITMQ_QUEUE = "iot-data"
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
@@ -37,7 +38,7 @@ rmq_connection = (
 # Define RabbitMQ Source
 rmq_source = RMQSource(
     connection_config=rmq_connection,
-    queue_name=RABBITMQ_QUEUE,  # Replace with your RabbitMQ queue name
+    queue_name=RABBITMQ_QUEUE,
     use_correlation_id=True,
     deserialization_schema=SimpleStringSchema(),
 )
