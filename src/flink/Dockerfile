@@ -28,6 +28,5 @@ RUN curl -fsSL "https://jdbc.postgresql.org/download/postgresql-${POSTGRES_JAR_V
 RUN curl -fsSL "https://repo.maven.apache.org/maven2/org/apache/flink/flink-connector-jdbc/${JDBC_JAR_VERSION}/flink-connector-jdbc-${JDBC_JAR_VERSION}.jar" \
     -o "${FLINK_LIB_DIR}/flink-connector-jdbc-${JDBC_JAR_VERSION}.jar"
 
-#COPY postgresql-42.7.5.jar /opt/flink/lib/postgresql-42.7.5.jar
 
 WORKDIR /opt/flink/jobs
