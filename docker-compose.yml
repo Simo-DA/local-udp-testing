@@ -150,7 +150,7 @@ services:
 
   flink-jobmanager:
     build:
-        context: ./src/flink
+      context: ./src/flink
     container_name: flink-jobmanager
     volumes:
       - ./src/flink/jobs:/opt/flink/jobs
@@ -177,14 +177,14 @@ services:
 
   flink-taskmanager:
     build:
-        context: ./src/flink
+      context: ./src/flink
     container_name: flink-taskmanager
     volumes:
       - ./src/flink/jobs:/opt/flink/jobs
     depends_on:
       - flink-jobmanager
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+      JOB_MANAGER_RPC_ADDRESS: flink-jobmanager
     command: taskmanager
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081"]
